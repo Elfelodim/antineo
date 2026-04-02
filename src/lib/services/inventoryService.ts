@@ -5,9 +5,7 @@ import { prisma } from '@/lib/prisma';
 
 export const inventoryService = {
     getProducts: async (): Promise<Product[]> => {
-        const products = await prisma.product.findMany({
-            include: { batches: true }
-        });
+        const products = await prisma.product.findMany();
         return products.map(p => ({
             id: p.id,
             code: p.code,
@@ -16,22 +14,21 @@ export const inventoryService = {
             category: p.category,
             unit: p.unit as any,
             minStock: p.minStock,
-            currentStock: p.currentStock,
+            currentStock: p.stock,
             price: p.price,
             status: p.status as any,
-            batches: p.batches.map(b => ({
-                id: b.id,
-                batchNumber: b.batchNumber,
-                expirationDate: b.expirationDate.toISOString().split('T')[0],
-                quantity: b.quantity
-            }))
+            batches: p.expirationDate ? [{
+                id: p.id,
+                batchNumber: 'DEFAULT',
+                expirationDate: p.expirationDate.toISOString().split('T')[0],
+                quantity: p.stock
+            }] : []
         }));
     },
 
     getProductById: async (id: string): Promise<Product | undefined> => {
         const product = await prisma.product.findUnique({
-            where: { id },
-            include: { batches: true }
+            where: { id }
         });
         if (!product) return undefined;
         return {
@@ -42,15 +39,15 @@ export const inventoryService = {
             category: product.category,
             unit: product.unit as any,
             minStock: product.minStock,
-            currentStock: product.currentStock,
+            currentStock: product.stock,
             price: product.price,
             status: product.status as any,
-            batches: product.batches.map(b => ({
-                id: b.id,
-                batchNumber: b.batchNumber,
-                expirationDate: b.expirationDate.toISOString().split('T')[0],
-                quantity: b.quantity
-            }))
+            batches: product.expirationDate ? [{
+                id: product.id,
+                batchNumber: 'DEFAULT',
+                expirationDate: product.expirationDate.toISOString().split('T')[0],
+                quantity: product.stock
+            }] : []
         };
     }
 };

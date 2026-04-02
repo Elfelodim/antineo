@@ -35,21 +35,20 @@ export default function ConsultationPage({ params }: { params: { id: string } })
         // Find diagnosis description
         const diag = MOCK_CIE10.find(d => d.code === formData.diagnosisCode);
 
-        await medicalRecordService.createConsultation({
+        await medicalRecordService.saveConsultation({
             patientId: patient.id,
             doctorId: 'DOC-001',
-            reasonForConsultation: formData.reasonForConsultation,
-            currentIllness: formData.currentIllness,
-            vitals: {
-                bloodPressure: formData.bloodPressure,
-                heartRate: Number(formData.heartRate),
-                respiratoryRate: Number(formData.respiratoryRate),
-                temperature: Number(formData.temperature),
-                weight: Number(formData.weight),
-                height: Number(formData.height)
-            },
+            doctorName: 'Dr. Ejemplo',
+            reasonForVisit: formData.reasonForConsultation,
+            clinicalHistory: formData.currentIllness,
+            bloodPressure: formData.bloodPressure,
+            heartRate: formData.heartRate,
+            respiratoryRate: formData.respiratoryRate,
+            temperature: formData.temperature,
+            weight: formData.weight,
+            height: formData.height,
             physicalExamFindings: formData.physicalExamFindings,
-            diagnosis: diag ? [{ ...diag, type: 'Principal' }] : [],
+            diagnoses: diag ? [{ code: diag.code, description: diag.description, type: 'Principal' }] : [],
             treatmentPlan: formData.treatmentPlan
         });
 

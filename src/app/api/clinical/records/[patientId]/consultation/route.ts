@@ -3,10 +3,11 @@ import { medicalRecordService } from '@/lib/services/medicalRecordService';
 
 export async function POST(
     request: Request,
-    { params }: { params: { patientId: string } }
+    props: { params: Promise<{ patientId: string }> }
 ) {
     try {
         const data = await request.json();
+        const params = await props.params;
         const record = await medicalRecordService.saveConsultation({ ...data, patientId: params.patientId });
         return NextResponse.json(record);
     } catch (error: any) {

@@ -134,11 +134,11 @@ export const medicalRecordService = {
                 reasonForVisit: data.reasonForVisit,
                 clinicalHistory: data.clinicalHistory,
                 bloodPressure: data.bloodPressure,
-                heartRate: data.heartRate,
-                respiratoryRate: data.respiratoryRate,
-                temperature: data.temperature,
-                weight: data.weight,
-                height: data.height,
+                heartRate: data.heartRate ? Number(data.heartRate) : null,
+                respiratoryRate: data.respiratoryRate ? Number(data.respiratoryRate) : null,
+                temperature: data.temperature ? Number(data.temperature) : null,
+                weight: data.weight ? Number(data.weight) : null,
+                height: data.height ? Number(data.height) : null,
                 physicalExamFindings: data.physicalExamFindings,
                 treatmentPlan: data.treatmentPlan,
                 observations: data.observations,
@@ -182,8 +182,8 @@ export const medicalRecordService = {
                 note: data.note,
                 doctorName: data.doctorName,
                 bloodPressure: data.bloodPressure,
-                heartRate: data.heartRate,
-                temperature: data.temperature
+                heartRate: data.heartRate ? Number(data.heartRate) : null,
+                temperature: data.temperature ? Number(data.temperature) : null
             }
         });
     },

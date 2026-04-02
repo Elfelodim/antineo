@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import { medicalRecordService } from '@/lib/services/medicalRecordService';
 
 export async function POST(
-    request: Request,
-    { params }: { params: { patientId: string } }
+    request: Request
 ) {
     try {
         const data = await request.json();

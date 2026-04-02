@@ -18,8 +18,8 @@ export const billingService = {
             invoiceNumber: inv.invoiceNumber,
             patientId: inv.patientId,
             patientName: `${inv.patient.firstName} ${inv.patient.lastName}`,
-            payerId: inv.payerId,
-            payerName: inv.payerName,
+            payerId: 'EPS-001', // Fallback
+            payerName: inv.patient.eps || 'Particular',
             date: inv.date.toISOString().split('T')[0],
             dueDate: inv.dueDate.toISOString().split('T')[0],
             items: inv.items.map(item => ({

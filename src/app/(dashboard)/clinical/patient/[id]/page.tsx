@@ -3,9 +3,11 @@ import { medicalRecordService } from '@/lib/services/medicalRecordService';
 import HistoryTimeline from '@/components/clinical/HistoryTimeline';
 import Link from 'next/link';
 
-export default async function PatientDetailPage({ params }: { params: { id: string } }) {
+export default async function PatientDetailPage(props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     const patient = await patientService.getPatientById(params.id);
-    const consultations = await medicalRecordService.getConsultationsByPatientId(params.id);
+    const fullHistory = await medicalRecordService.getPatientFullHistory(params.id);
+    const consultations = fullHistory.consultations as any;
 
     if (!patient) {
         return <div className="p-4">Paciente no encontrado</div>;

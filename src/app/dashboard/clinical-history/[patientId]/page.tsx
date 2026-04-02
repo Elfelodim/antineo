@@ -75,7 +75,7 @@ export default function ClinicalHistoryPage() {
             <main className="tab-content glass-panel">
                 {activeTab === 'consultas' && (
                     <div className="consultations-timeline">
-                        {history?.consultations?.length > 0 ? (
+                        {(history?.consultations?.length ?? 0) > 0 ? (
                             history!.consultations.map((record) => (
                                 <div key={record.id} className="consultation-card">
                                     <div className="card-header">
@@ -101,7 +101,7 @@ export default function ClinicalHistoryPage() {
 
                 {activeTab === 'hospitalizacion' && (
                     <div className="hospitalization-view">
-                        {history?.hospitalizations?.length > 0 ? (
+                        {(history?.hospitalizations?.length ?? 0) > 0 ? (
                             history!.hospitalizations.map((hosp) => (
                                 <div key={hosp.id} className={`hosp-card ${hosp.status.toLowerCase()}`}>
                                     <div className="hosp-header">
@@ -161,7 +161,7 @@ export default function ClinicalHistoryPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {history?.labResults?.length > 0 ? (
+                                {(history?.labResults?.length ?? 0) > 0 ? (
                                     history!.labResults.map((lab) => (
                                         <tr key={lab.id} className={`status-${lab.status.toLowerCase()}`}>
                                             <td>{new Date(lab.performedAt).toLocaleDateString()}</td>
@@ -188,7 +188,7 @@ export default function ClinicalHistoryPage() {
 
                 {activeTab === 'imagenes' && (
                     <div className="images-gallery">
-                        {history?.diagnosticImages?.length > 0 ? (
+                        {(history?.diagnosticImages?.length ?? 0) > 0 ? (
                             history!.diagnosticImages.map((img) => (
                                 <div key={img.id} className="image-card">
                                     <div className="image-placeholder">
@@ -214,7 +214,7 @@ export default function ClinicalHistoryPage() {
 
                 {activeTab === 'escaneos' && (
                     <div className="scans-list">
-                        {history?.machineScans?.length > 0 ? (
+                        {(history?.machineScans?.length ?? 0) > 0 ? (
                             history!.machineScans.map((scan) => (
                                 <div key={scan.id} className="scan-item">
                                     <div className="scan-header">
