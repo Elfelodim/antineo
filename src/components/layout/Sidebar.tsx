@@ -22,9 +22,10 @@ export default function Sidebar() {
   const userRole = session?.user?.role || 'User';
 
   // Filter items
-  const visibleItems = menuItems.filter(item =>
-    item.roles.includes(userRole) || item.roles.includes('All')
-  );
+  const visibleItems = menuItems.filter(item => {
+    const itemRolesLower = item.roles.map(r => r.toLowerCase());
+    return itemRolesLower.includes(userRole.toLowerCase()) || itemRolesLower.includes('all');
+  });
 
   return (
     <aside className="sidebar">
