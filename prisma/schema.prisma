@@ -1,0 +1,275 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- User Management & Auth ---
+model User {
+  id            String    @id @default(uuid())
+  name          String?
+  email         String    @unique
+  password      String    // Hashed
+  role          String    @default("User") // Admin, Doctor, Nurse, Receptionist
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// --- Patient Management ---
+model Patient {
+  id             String          @id @default(uuid())
+  firstName      String
+  lastName       String
+  documentType   String
+  documentNumber String          @unique
+  dateOfBirth    String
+  sex            String
+  address        String
+  phone          String
+  email          String?
+  eps            String
+  regime         String
+  status         String          @default("Active")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  consultations  MedicalRecord[]
+  appointments   Appointment[]
+  surgeries      Surgery[]
+  invoices       Invoice[]
+  labResults     LabResult[]
+  diagnosticImages DiagnosticImage[]
+  machineScans   MachineScan[]
+  hospitalizations Hospitalization[]
+}
+
+// --- Electronic Medical Records (EMR) ---
+model MedicalRecord {
+  id                    String      @id @default(uuid())
+  patientId             String
+  patient               Patient     @relation(fields: [patientId], references: [id])
+  doctorId              String
+  doctorName            String
+  reasonForVisit        String
+  clinicalHistory       String      // Enfermedad actual
+  
+  // Vital Signs
+  bloodPressure        String?
+  heartRate            Int?
+  respiratoryRate       Int?
+  temperature           Float?
+  weight                Float?
+  height                Float?
+
+  // Physical Exam
+  physicalExamFindings  String
+
+  // Plan
+  treatmentPlan         String
+  observations          String?
+
+  diagnoses             Diagnosis[]
+  createdAt            DateTime    @default(now())
+}
+
+model Diagnosis {
+  id              String        @id @default(uuid())
+  medicalRecordId String
+  medicalRecord   MedicalRecord @relation(fields: [medicalRecordId], references: [id])
+  code            String        // CIE-10
+  description     String
+  type            String        // Principal, Relacionado
+}
+
+model LabResult {
+  id              String        @id @default(uuid())
+  patientId       String
+  patient         Patient       @relation(fields: [patientId], references: [id])
+  testName        String
+  value           String
+  referenceRange  String
+  unit            String
+  status          String        // Normal, Abnormal, Critical
+  performedAt     DateTime      @default(now())
+  observations    String?
+  attachmentUrl   String?       // URL to uploaded file
+}
+
+model DiagnosticImage {
+  id              String        @id @default(uuid())
+  patientId       String
+  patient         Patient       @relation(fields: [patientId], references: [id])
+  imageType       String        // X-Ray, MRI, etc.
+  imageUrl        String
+  report          String?
+  performedAt     DateTime      @default(now())
+}
+
+model MachineScan {
+  id              String        @id @default(uuid())
+  patientId       String
+  patient         Patient       @relation(fields: [patientId], references: [id])
+  machineType     String
+  rawOutputUrl    String?
+  interpretation  String?
+  performedAt     DateTime      @default(now())
+}
+
+// --- Hospitalization ---
+model Hospitalization {
+  id                String      @id @default(uuid())
+  patientId         String
+  patient           Patient     @relation(fields: [patientId], references: [id])
+  admissionDate     DateTime    @default(now())
+  dischargeDate     DateTime?
+  bedNumber         String
+  admissionDiagnosis String
+  status            String      @default("Active") // Active, Discharged
+  doctorInCharge    String
+  
+  evolutions        Evolution[]
+  epicrisis         Epicrisis?
+}
+
+model Evolution {
+  id                String      @id @default(uuid())
+  hospitalizationId String
+  hospitalization   Hospitalization @relation(fields: [hospitalizationId], references: [id])
+  date              DateTime    @default(now())
+  note              String
+  doctorName        String
+  
+  // Vitals recorded during evolution
+  bloodPressure     String?
+  heartRate         Int?
+  temperature       Float?
+}
+
+model Epicrisis {
+  id                String      @id @default(uuid())
+  hospitalizationId String      @unique
+  hospitalization   Hospitalization @relation(fields: [hospitalizationId], references: [id])
+  date              DateTime    @default(now())
+  summary           String
+  treatments        String
+  recommendations   String
+}
+
+// --- Scheduling & Surgery ---
+model Appointment {
+  id          String   @id @default(uuid())
+  patientId   String
+  patient     Patient  @relation(fields: [patientId], references: [id])
+  doctorId    String
+  doctorName  String
+  date        DateTime
+  startTime   String
+  endTime     String
+  type        String   // General, Specialist
+  status      String   // Scheduled, Confirmed, Cancelled
+  notes       String?
+}
+
+model OperatingRoom {
+  id        String    @id @default(uuid())
+  name      String
+  status    String    // Available, Occupied
+  surgeries Surgery[]
+}
+
+model Surgery {
+  id              String        @id @default(uuid())
+  patientId       String
+  patient         Patient       @relation(fields: [patientId], references: [id])
+  surgeonId       String
+  surgeonName     String
+  procedureCode   String
+  procedureName   String
+  urgency         String        // Elective, Urgent
+  requestedDate   DateTime
+  status          String        // Pending, Scheduled
+  operatingRoomId String?
+  operatingRoom   OperatingRoom? @relation(fields: [operatingRoomId], references: [id])
+}
+
+// --- Inventory ---
+model Product {
+  id           String             @id @default(uuid())
+  code         String             @unique
+  name         String
+  type         String             // Medicine, MedicalDevice
+  category     String
+  unit         String
+  price        Float
+  stock        Int                @default(0)
+  minStock     Int                @default(0)
+  expirationDate DateTime?
+  status       String             @default("Active")
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt @default(now())
+
+  inventories  InventoryMovement[]
+}
+
+model InventoryMovement {
+  id          String   @id @default(uuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  type        String   // In, Out
+  quantity    Int
+  reason      String
+  date        DateTime @default(now())
+  reference   String?
+}
+
+// --- Billing ---
+model Invoice {
+  id            String        @id @default(uuid())
+  patientId     String
+  patient       Patient       @relation(fields: [patientId], references: [id])
+  invoiceNumber String        @unique
+  date          DateTime      @default(now())
+  dueDate       DateTime
+  subtotal      Float
+  tax           Float
+  total         Float
+  status        String        // Draft, Issued, Paid
+  ripsGenerated Boolean       @default(false)
+
+  items         InvoiceItem[]
+}
+
+model InvoiceItem {
+  id          String  @id @default(uuid())
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id])
+  code        String
+  description String
+  quantity    Int
+  unitPrice   Float
+  total       Float
+}
+
+// --- Accounting & Payroll ---
+model Account {
+  id      String @id @default(uuid())
+  code    String @unique // PUC
+  name    String
+  type    String // Asset, Liability
+  balance Float
+}
+
+model Payroll {
+  id               String   @id @default(uuid())
+  employeeId       String
+  employeeName     String
+  period           String
+  basicSalary      Float
+  healthDeduction  Float
+  pensionDeduction Float
+  netPay           Float
+  status           String   // Pending, Paid
+}
